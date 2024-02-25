@@ -1,8 +1,8 @@
 pub mod tcp;
+use std::io;
 use tcp::tcp_server;
-use std::error::Error;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> io::Result<()>{
     tcp_server().await
 }
