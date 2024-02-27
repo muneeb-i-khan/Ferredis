@@ -5,8 +5,14 @@ use tokio::{
     net::{TcpListener, TcpStream},
 };
 
+use crate::parser::run_cmd;
+
+const BUFFER_SIZE: usize = 1024;
+pub type TCPBuffer = [u8; BUFFER_SIZE];
+const PORT: &str = "127.0.0.1:6379";
+
 pub async fn tcp_server() -> io::Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:6379").await.unwrap();
+    let listener = TcpListener::bind(PORT).await.unwrap();
     println!("Server listening on port 6379...");
 
     loop {
@@ -25,16 +31,16 @@ pub async fn tcp_server() -> io::Result<()> {
 }
 
 async fn handle_connection(mut stream: TcpStream) -> Result<(), Box<dyn Error>> {
-    let res = "+PONG\r\n";
     loop {
-        let mut buf = [0; 512];
+        let mut buf = [0; 1024];
         match stream.read(&mut buf).await {
             Ok(0) => break,
             Ok(_) => {
-                stream.write_all(res.as_bytes()).await.unwrap();
+                let res = run_cmd(buf).await;
+                stream.write_all(res.as_slice()).await.unwrap();
             }
             Err(e) => {
-                println!("Error occured: {}", e);
+                println!("Error occurred: {}", e);
                 break;
             }
         }

@@ -1,4 +1,7 @@
 pub mod tcp;
+pub mod resp;
+pub mod parser;
+pub mod cmd;
 use std::io;
 use tcp::tcp_server;
 
